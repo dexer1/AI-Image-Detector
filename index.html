@@ -1,0 +1,379 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Image Detector</title>
+    <style>
+      :root {
+        --ink: #0f172a;
+        --muted: #5b6475;
+        --brand: #0f766e;
+        --brand-strong: #0d9488;
+        --glow: rgba(13, 148, 136, 0.2);
+        --paper: #f8fafc;
+        --panel: #ffffff;
+        --danger: #ef4444;
+        --safe: #10b981;
+        --shadow: 0 24px 60px rgba(15, 23, 42, 0.12);
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: "Space Grotesk", "Segoe UI", sans-serif;
+        background: radial-gradient(circle at top, #e0f2fe 0%, #f8fafc 45%, #fff7ed 100%);
+        color: var(--ink);
+        min-height: 100vh;
+      }
+
+      .page {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+      }
+
+      header {
+        padding: 24px 6vw;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+        background: rgba(255, 255, 255, 0.75);
+        backdrop-filter: blur(12px);
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+
+      .brand-badge {
+        width: 44px;
+        height: 44px;
+        border-radius: 14px;
+        background: linear-gradient(140deg, var(--brand) 0%, #38bdf8 100%);
+        display: grid;
+        place-items: center;
+        box-shadow: 0 12px 24px var(--glow);
+        color: #fff;
+        font-weight: 700;
+      }
+
+      .brand h1 {
+        font-size: 1.3rem;
+        letter-spacing: -0.02em;
+      }
+
+      .hero {
+        text-align: center;
+        padding: 64px 6vw 32px;
+      }
+
+      .hero h2 {
+        font-size: clamp(2.2rem, 3.8vw, 3.5rem);
+        margin-bottom: 16px;
+        letter-spacing: -0.03em;
+      }
+
+      .hero p {
+        color: var(--muted);
+        font-size: 1.05rem;
+        max-width: 640px;
+        margin: 0 auto;
+      }
+
+      .stage {
+        width: min(980px, 90vw);
+        margin: 0 auto 64px;
+        background: var(--panel);
+        border-radius: 28px;
+        box-shadow: var(--shadow);
+        padding: 32px;
+        display: grid;
+        gap: 28px;
+      }
+
+      .upload-zone {
+        border: 2px dashed rgba(15, 118, 110, 0.25);
+        border-radius: 24px;
+        padding: 36px;
+        text-align: center;
+        cursor: pointer;
+        transition: border-color 0.2s ease, transform 0.2s ease;
+        background: linear-gradient(180deg, rgba(240, 253, 250, 0.8), rgba(255, 255, 255, 0.7));
+      }
+
+      .upload-zone:hover {
+        border-color: rgba(15, 118, 110, 0.6);
+        transform: translateY(-2px);
+      }
+
+      .upload-zone input {
+        display: none;
+      }
+
+      .upload-zone strong {
+        display: block;
+        font-size: 1.25rem;
+        margin-bottom: 6px;
+      }
+
+      .upload-zone span {
+        color: var(--muted);
+      }
+
+      .preview {
+        display: grid;
+        gap: 18px;
+      }
+
+      .preview img {
+        width: 100%;
+        height: 320px;
+        object-fit: cover;
+        border-radius: 18px;
+      }
+
+      .progress {
+        height: 12px;
+        width: 100%;
+        background: #e2e8f0;
+        border-radius: 999px;
+        overflow: hidden;
+      }
+
+      .progress span {
+        display: block;
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(90deg, var(--brand), var(--brand-strong));
+        transition: width 0.2s ease;
+      }
+
+      .results {
+        display: grid;
+        gap: 16px;
+      }
+
+      .result-card {
+        border-radius: 18px;
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: #f8fafc;
+        border: 1px solid rgba(148, 163, 184, 0.25);
+      }
+
+      .status {
+        font-size: 0.95rem;
+        color: var(--muted);
+      }
+
+      .score {
+        font-size: 1.4rem;
+        font-weight: 700;
+      }
+
+      .score.safe {
+        color: var(--safe);
+      }
+
+      .score.danger {
+        color: var(--danger);
+      }
+
+      .cta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      button {
+        border: none;
+        border-radius: 999px;
+        padding: 12px 24px;
+        font-weight: 600;
+        cursor: pointer;
+        background: var(--ink);
+        color: #fff;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 12px 24px rgba(15, 23, 42, 0.15);
+      }
+
+      .ghost {
+        background: #e2e8f0;
+        color: var(--ink);
+      }
+
+      footer {
+        margin-top: auto;
+        text-align: center;
+        padding: 24px 6vw;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+
+      @media (max-width: 720px) {
+        header {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 12px;
+        }
+
+        .stage {
+          padding: 22px;
+        }
+
+        .preview img {
+          height: 220px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <header>
+        <div class="brand">
+          <div class="brand-badge">AI</div>
+          <h1>AI Image Detector</h1>
+        </div>
+        <div class="status">Local analysis without uploading files</div>
+      </header>
+
+      <section class="hero">
+        <h2>Check if an image was created by AI</h2>
+        <p>
+          Upload a photo and the system will simulate analysis, showing the probability
+          that the image was generated by artificial intelligence.
+        </p>
+      </section>
+
+      <section class="stage">
+        <label class="upload-zone" id="uploadZone">
+          <input type="file" id="fileInput" accept="image/*" />
+          <strong>Drag an image here</strong>
+          <span>or click to choose a file</span>
+        </label>
+
+        <div class="preview" id="preview" hidden>
+          <img id="previewImage" alt="Uploaded preview" />
+          <div class="progress"><span id="progressBar"></span></div>
+        </div>
+
+        <div class="results" id="results" hidden>
+          <div class="result-card">
+            <div>
+              <div class="status">Analysis result</div>
+              <div id="resultLabel">AI Generated</div>
+            </div>
+            <div id="resultScore" class="score danger">92%</div>
+          </div>
+          <div class="cta">
+            <div class="status" id="detailText">Suspicious for AI generation.</div>
+            <div>
+              <button class="ghost" id="resetBtn">Reset</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <footer>2026 AI Image Detector. Demo mode without a real ML model.</footer>
+    </div>
+
+    <script>
+      const fileInput = document.getElementById("fileInput");
+      const preview = document.getElementById("preview");
+      const previewImage = document.getElementById("previewImage");
+      const progressBar = document.getElementById("progressBar");
+      const results = document.getElementById("results");
+      const resultLabel = document.getElementById("resultLabel");
+      const resultScore = document.getElementById("resultScore");
+      const detailText = document.getElementById("detailText");
+      const resetBtn = document.getElementById("resetBtn");
+      const uploadZone = document.getElementById("uploadZone");
+
+      let progressTimer = null;
+
+      const resetView = () => {
+        preview.hidden = true;
+        results.hidden = true;
+        progressBar.style.width = "0%";
+        fileInput.value = "";
+      };
+
+      const simulateScan = () => {
+        let progress = 0;
+        preview.hidden = false;
+        results.hidden = true;
+        progressBar.style.width = "0%";
+
+        progressTimer = setInterval(() => {
+          progress = Math.min(progress + Math.random() * 12, 100);
+          progressBar.style.width = `${progress.toFixed(0)}%`;
+          if (progress >= 100) {
+            clearInterval(progressTimer);
+            showResults();
+          }
+        }, 180);
+      };
+
+      const showResults = () => {
+        const aiScore = Math.floor(60 + Math.random() * 40);
+        const isAi = aiScore >= 75;
+        resultLabel.textContent = isAi ? "AI Generated" : "Likely Real";
+        resultScore.textContent = `${aiScore}%`;
+        resultScore.className = `score ${isAi ? "danger" : "safe"}`;
+        detailText.textContent = isAi
+          ? "Suspicious for AI generation."
+          : "The image looks real.";
+        results.hidden = false;
+      };
+
+      fileInput.addEventListener("change", (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+        previewImage.src = URL.createObjectURL(file);
+        simulateScan();
+      });
+
+      resetBtn.addEventListener("click", resetView);
+
+      uploadZone.addEventListener("dragover", (event) => {
+        event.preventDefault();
+        uploadZone.style.borderColor = "rgba(15, 118, 110, 0.8)";
+      });
+
+      uploadZone.addEventListener("dragleave", () => {
+        uploadZone.style.borderColor = "rgba(15, 118, 110, 0.25)";
+      });
+
+      uploadZone.addEventListener("drop", (event) => {
+        event.preventDefault();
+        uploadZone.style.borderColor = "rgba(15, 118, 110, 0.25)";
+        const file = event.dataTransfer.files[0];
+        if (!file) return;
+        fileInput.files = event.dataTransfer.files;
+        previewImage.src = URL.createObjectURL(file);
+        simulateScan();
+      });
+
+      resetView();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,9 @@
+﻿[build]
+  command = "npm run build"
+  publish = "build"
+
+# Single Page Application routing
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

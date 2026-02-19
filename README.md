@@ -1,26 +1,43 @@
-﻿# Minimalist AI Image Identifier
+﻿# AI Image Identifier
 
-This is a code bundle for Minimalist AI Image Identifier. The original project is available at https://www.figma.com/design/w1yAnT4pcx25cQHMrDxKTS/Minimalist-AI-Image-Identifier.
+This project is now deployable as a single Netlify site.
+Your trained model runs directly in the browser (no Python server required in production).
 
-## Run the connected app (frontend + your model)
+## How it works
 
-1. Start the Python model API (Terminal 1):
+- Model file: `public/model/model.onnx`
+- Runtime: `onnxruntime-web`
+- Inference happens in `src/App.tsx`
 
-```powershell
-.\.venv\Scripts\python.exe api_server.py
-```
-
-2. Start the React app (Terminal 2):
+## Local run
 
 ```powershell
 cmd /c npm run dev
 ```
 
-3. Open the frontend URL shown by Vite (usually `http://127.0.0.1:3000`).
+Open `http://127.0.0.1:3000`
 
-The frontend sends uploaded images to `http://127.0.0.1:8000/api/predict`, which uses `ai_noai_model.keras` for inference.
+## Netlify deploy (single link for teacher)
+
+1. Push your latest code to GitHub.
+2. In Netlify, create site from that GitHub repo.
+3. Build settings:
+   - Build command: `npm run build`
+   - Publish directory: `build`
+4. Deploy.
+
+`netlify.toml` is already configured for SPA routing.
 
 ## Notes
 
-- Model file path expected by API: `./ai_noai_model.keras`
-- The API assumes training class folders were `ai` and `noai` (so model sigmoid output corresponds to `noai` probability).
+- No backend or API URL is required for deployed usage.
+- The model file is bundled as a static asset from `public/model/model.onnx`.
+- First prediction may take longer because the model is loaded in the browser.
+
+## Optional: regenerate ONNX model from `.keras`
+
+This was used to convert your model:
+
+```powershell
+.\.venv_convert\Scripts\python.exe -c "import tensorflow as tf, tf2onnx; m=tf.keras.models.load_model('ai_noai_model.keras'); m.output_names=[o.name.split(':')[0] for o in m.outputs]; spec=(tf.TensorSpec((None,500,500,3), tf.float32, name='input'),); tf2onnx.convert.from_keras(m, input_signature=spec, opset=13, output_path='public/model/model.onnx'); print('onnx exported')"
+```

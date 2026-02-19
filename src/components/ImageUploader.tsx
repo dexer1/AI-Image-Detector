@@ -3,9 +3,10 @@ import { Upload } from 'lucide-react';
 
 interface ImageUploaderProps {
   onImageUpload: (file: File) => void;
+  disabled?: boolean;
 }
 
-export function ImageUploader({ onImageUpload }: ImageUploaderProps) {
+export function ImageUploader({ onImageUpload, disabled = false }: ImageUploaderProps) {
   const [isDragging, setIsDragging] = useState(false);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -24,21 +25,21 @@ export function ImageUploader({ onImageUpload }: ImageUploaderProps) {
       setIsDragging(false);
 
       const files = e.dataTransfer.files;
-      if (files && files[0] && files[0].type.startsWith('image/')) {
+      if (!disabled && files && files[0] && files[0].type.startsWith('image/')) {
         onImageUpload(files[0]);
       }
     },
-    [onImageUpload]
+    [disabled, onImageUpload]
   );
 
   const handleFileInput = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const files = e.target.files;
-      if (files && files[0]) {
+      if (!disabled && files && files[0]) {
         onImageUpload(files[0]);
       }
     },
-    [onImageUpload]
+    [disabled, onImageUpload]
   );
 
   return (
@@ -55,6 +56,7 @@ export function ImageUploader({ onImageUpload }: ImageUploaderProps) {
               ? 'border-emerald-500 bg-emerald-50'
               : 'border-gray-200 hover:border-emerald-300'
           }
+          ${disabled ? 'opacity-60 cursor-not-allowed' : ''}
         `}
       >
         <div className="text-center">
@@ -72,13 +74,14 @@ export function ImageUploader({ onImageUpload }: ImageUploaderProps) {
           <label htmlFor="file-upload" className="cursor-pointer">
             <div className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors">
               <Upload className="w-5 h-5" />
-              <span className="font-medium">Choose File</span>
+              <span className="font-medium">{disabled ? 'Model Loading...' : 'Choose File'}</span>
             </div>
             <input
               id="file-upload"
               type="file"
               accept="image/*"
               onChange={handleFileInput}
+              disabled={disabled}
               className="hidden"
             />
           </label>

@@ -1,4 +1,5 @@
-﻿import React, { useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
+import * as ort from 'onnxruntime-web';
 import { Upload, CheckCircle, Image as ImageIcon } from 'lucide-react';
 import { ImageUploader } from './components/ImageUploader';
 import { ProgressBar } from './components/ProgressBar';
@@ -10,30 +11,83 @@ interface AnalysisResult {
   color: string;
 }
 
-interface PredictionResponse {
-  ai_probability: number;
-  human_probability: number;
+const MODEL_PATH = '/model/model.onnx';
+const MODEL_IMAGE_SIZE = 500;
+
+function clamp01(value: number): number {
+  return Math.max(0, Math.min(1, value));
 }
 
-const MODEL_API_URL = 'http://127.0.0.1:8000/api/predict';
+function preprocessImage(bitmap: ImageBitmap): Float32Array {
+  const canvas = document.createElement('canvas');
+  canvas.width = MODEL_IMAGE_SIZE;
+  canvas.height = MODEL_IMAGE_SIZE;
 
-function fileToDataUrl(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result));
-    reader.onerror = () => reject(new Error('Could not read the selected file.'));
-    reader.readAsDataURL(file);
-  });
+  const ctx = canvas.getContext('2d');
+  if (!ctx) {
+    throw new Error('Failed to create image processing context.');
+  }
+
+  ctx.drawImage(bitmap, 0, 0, MODEL_IMAGE_SIZE, MODEL_IMAGE_SIZE);
+  const imageData = ctx.getImageData(0, 0, MODEL_IMAGE_SIZE, MODEL_IMAGE_SIZE);
+
+  const rgb = new Float32Array(MODEL_IMAGE_SIZE * MODEL_IMAGE_SIZE * 3);
+  for (let src = 0, dst = 0; src < imageData.data.length; src += 4) {
+    rgb[dst++] = imageData.data[src] / 255;
+    rgb[dst++] = imageData.data[src + 1] / 255;
+    rgb[dst++] = imageData.data[src + 2] / 255;
+  }
+
+  return rgb;
 }
 
 export default function App() {
   const [isScanning, setIsScanning] = useState(false);
+  const [isModelLoading, setIsModelLoading] = useState(true);
+  const [session, setSession] = useState<ort.InferenceSession | null>(null);
   const [progress, setProgress] = useState(0);
   const [results, setResults] = useState<AnalysisResult[] | null>(null);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadModel = async () => {
+      try {
+        const modelSession = await ort.InferenceSession.create(MODEL_PATH, {
+          executionProviders: ['wasm'],
+        });
+
+        if (!isMounted) return;
+        setSession(modelSession);
+      } catch (error) {
+        if (!isMounted) return;
+        setErrorMessage(
+          error instanceof Error
+            ? `Model load failed: ${error.message}`
+            : 'Model load failed. Make sure /model/model.onnx is deployed.'
+        );
+      } finally {
+        if (isMounted) {
+          setIsModelLoading(false);
+        }
+      }
+    };
+
+    loadModel();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   const handleImageUpload = async (file: File) => {
+    if (!session) {
+      setErrorMessage('Model is not ready yet. Please wait a moment and try again.');
+      return;
+    }
+
     const imageUrl = URL.createObjectURL(file);
     setUploadedImage(imageUrl);
     setResults(null);
@@ -49,22 +103,23 @@ export default function App() {
     }, 50);
 
     try {
-      const imageBase64 = await fileToDataUrl(file);
-      const response = await fetch(MODEL_API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ imageBase64 }),
-      });
+      const bitmap = await createImageBitmap(file);
+      const inputData = preprocessImage(bitmap);
+      bitmap.close();
 
-      if (!response.ok) {
-        throw new Error(`Prediction request failed with status ${response.status}.`);
+      const inputTensor = new ort.Tensor('float32', inputData, [1, MODEL_IMAGE_SIZE, MODEL_IMAGE_SIZE, 3]);
+      const output = await session.run({ [session.inputNames[0]]: inputTensor });
+      const outputTensor = output[session.outputNames[0]];
+
+      if (!outputTensor || !outputTensor.data || outputTensor.data.length === 0) {
+        throw new Error('Model returned empty output.');
       }
 
-      const prediction: PredictionResponse = await response.json();
-      const aiConfidence = Number((prediction.ai_probability * 100).toFixed(1));
-      const humanConfidence = Number((prediction.human_probability * 100).toFixed(1));
+      const noAiProbability = clamp01(Number(outputTensor.data[0]));
+      const aiProbability = clamp01(1 - noAiProbability);
+
+      const aiConfidence = Number((aiProbability * 100).toFixed(1));
+      const humanConfidence = Number((noAiProbability * 100).toFixed(1));
 
       setResults(
         [
@@ -76,8 +131,8 @@ export default function App() {
     } catch (error) {
       setErrorMessage(
         error instanceof Error
-          ? `${error.message} Make sure the Python model API is running on http://127.0.0.1:8000.`
-          : 'Prediction failed. Make sure the Python model API is running on http://127.0.0.1:8000.'
+          ? `Prediction failed: ${error.message}`
+          : 'Prediction failed. Please try another image.'
       );
       setUploadedImage(null);
       setProgress(0);
@@ -116,6 +171,9 @@ export default function App() {
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             Upload an image and let our AI analyze and identify objects, scenes, and categories with precision.
           </p>
+          {isModelLoading && (
+            <p className="text-sm text-emerald-700 mt-4">Loading local ML model...</p>
+          )}
         </div>
 
         {errorMessage && (
@@ -124,7 +182,7 @@ export default function App() {
           </div>
         )}
 
-        {!uploadedImage && <ImageUploader onImageUpload={handleImageUpload} />}
+        {!uploadedImage && <ImageUploader onImageUpload={handleImageUpload} disabled={isModelLoading || !session} />}
 
         {isScanning && uploadedImage && (
           <div className="max-w-3xl mx-auto space-y-8">

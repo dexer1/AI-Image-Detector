@@ -11,8 +11,8 @@ import tensorflow as tf
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_PATH = os.path.join(SCRIPT_DIR, "ai_noai_model.keras")
 IMG_SIZE = (500, 500)
-HOST = os.getenv("MODEL_API_HOST", "127.0.0.1")
-PORT = int(os.getenv("MODEL_API_PORT", "8000"))
+HOST = os.getenv("MODEL_API_HOST", "0.0.0.0")
+PORT = int(os.getenv("PORT", os.getenv("MODEL_API_PORT", "8000")))
 
 
 if not os.path.exists(MODEL_PATH):

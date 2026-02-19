@@ -28,6 +28,17 @@ Open `http://127.0.0.1:3000`
 
 `netlify.toml` is already configured for SPA routing.
 
+## Railway deploy (if you use Railway UI)
+
+1. Push latest `main`.
+2. In Railway, redeploy from GitHub.
+3. Ensure it detects Node (not Python).
+4. It should run:
+   - Build: `npm run build`
+   - Start: `npm start`
+
+`requirements.txt` and `Procfile` were removed on purpose so Railway does not try to install TensorFlow.
+
 ## Notes
 
 - No backend or API URL is required for deployed usage.

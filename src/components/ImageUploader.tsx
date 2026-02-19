@@ -48,7 +48,7 @@ export function ImageUploader({ onImageUpload }: ImageUploaderProps) {
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         className={`
-          relative bg-white rounded-2xl shadow-lg p-12 sm:p-16
+          relative bg-white rounded-2xl shadow-md p-12 sm:p-16
           border-2 border-dashed transition-all duration-200
           ${
             isDragging
@@ -62,7 +62,7 @@ export function ImageUploader({ onImageUpload }: ImageUploaderProps) {
             <Upload className="w-8 h-8 text-emerald-600" />
           </div>
           
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">
+          <h3 className="text-2xl font-semibold text-gray-900 mb-2">
             Drop your image here
           </h3>
           <p className="text-gray-600 mb-6">

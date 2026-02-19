@@ -68,8 +68,8 @@ export default function App() {
 
       setResults(
         [
-          { category: 'AI Generated', confidence: aiConfidence, color: 'bg-rose-500' },
-          { category: 'Likely Real', confidence: humanConfidence, color: 'bg-emerald-500' },
+          { category: 'AI Generated', confidence: aiConfidence, color: '#10b981' },
+          { category: 'Likely Real', confidence: humanConfidence, color: '#cbd5e1' },
         ].sort((a, b) => b.confidence - a.confidence)
       );
       setProgress(100);
@@ -96,25 +96,25 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      <header className="border-b border-gray-100">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div className="min-h-screen bg-gray-100">
+      <header className="border-b border-gray-200 bg-white">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-emerald-500 rounded-lg flex items-center justify-center">
-              <ImageIcon className="w-6 h-6 text-white" />
+            <div className="w-8 h-8 bg-emerald-500 rounded-md flex items-center justify-center">
+              <ImageIcon className="w-5 h-5 text-white" />
             </div>
             <h1 className="text-2xl font-semibold text-gray-900">AI Image Identifier</h1>
           </div>
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
-        <div className="text-center mb-12 sm:mb-16">
-          <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4">
-            Detect AI-Generated Images
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-16">
+        <div className="text-center mb-12 sm:mb-14">
+          <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-3">
+            Identify Anything
           </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Upload an image and run your trained model to estimate whether it is AI-generated or real.
+            Upload an image and let our AI analyze and identify objects, scenes, and categories with precision.
           </p>
         </div>
 
@@ -148,9 +148,9 @@ export default function App() {
         )}
 
         {!uploadedImage && (
-          <div className="grid md:grid-cols-3 gap-6 sm:gap-8 mt-16 sm:mt-20">
-            <div className="bg-white rounded-2xl shadow-md p-6 sm:p-8 hover:shadow-lg transition-shadow">
-              <div className="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center mb-4">
+          <div className="grid md:grid-cols-3 gap-6 sm:gap-8 mt-16 sm:mt-20 max-w-5xl mx-auto">
+            <div className="bg-white rounded-2xl shadow-md p-6 sm:p-7 hover:shadow-lg transition-shadow border border-gray-100">
+              <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center mb-4">
                 <Upload className="w-6 h-6 text-emerald-600" />
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">Easy Upload</h3>
@@ -159,36 +159,30 @@ export default function App() {
               </p>
             </div>
 
-            <div className="bg-white rounded-2xl shadow-md p-6 sm:p-8 hover:shadow-lg transition-shadow">
-              <div className="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center mb-4">
+            <div className="bg-white rounded-2xl shadow-md p-6 sm:p-7 hover:shadow-lg transition-shadow border border-gray-100">
+              <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center mb-4">
                 <CheckCircle className="w-6 h-6 text-emerald-600" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Model-Powered Results</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">Accurate Results</h3>
               <p className="text-gray-600">
-                Results come directly from your TensorFlow model instead of mock values.
+                Get detailed confidence scores and multiple category predictions.
               </p>
             </div>
 
-            <div className="bg-white rounded-2xl shadow-md p-6 sm:p-8 hover:shadow-lg transition-shadow">
-              <div className="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center mb-4">
+            <div className="bg-white rounded-2xl shadow-md p-6 sm:p-7 hover:shadow-lg transition-shadow border border-gray-100">
+              <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center mb-4">
                 <ImageIcon className="w-6 h-6 text-emerald-600" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Binary AI Detection</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">Real-time Analysis</h3>
               <p className="text-gray-600">
-                See both probabilities: AI-generated and likely-real.
+                Watch as our AI processes your image and identifies patterns instantly.
               </p>
             </div>
           </div>
         )}
       </main>
 
-      <footer className="border-t border-gray-100 mt-20">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <p className="text-center text-gray-500 text-sm">
-            © 2026 AI Image Identifier. Powered by advanced machine learning.
-          </p>
-        </div>
-      </footer>
+      <div className="h-10" />
     </div>
   );
 }

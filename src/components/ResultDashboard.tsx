@@ -75,9 +75,10 @@ export function ResultDashboard({ results, imageUrl, onReset }: ResultDashboardP
                 </div>
                 <div className="w-full h-2.5 bg-gray-100 rounded-full overflow-hidden">
                   <div
-                    className={`h-full ${result.color} transition-all duration-500 rounded-full`}
+                    className="h-full transition-all duration-500 rounded-full"
                     style={{
                       width: `${result.confidence}%`,
+                      backgroundColor: result.color,
                       transitionDelay: `${index * 100}ms`,
                     }}
                   />

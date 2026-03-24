@@ -203,7 +203,7 @@ export default function App() {
           </div>
         )}
 
-        {results && uploadedImage && !isScanning && (
+        {results && uploadedImage && !isScanning && !showPopup && (
           <ResultDashboard
             results={results}
             imageUrl={uploadedImage}

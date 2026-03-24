@@ -11,6 +11,14 @@ interface AnalysisResult {
   color: string;
 }
 
+interface ImageHistoryItem {
+  id: number;
+  imageUrl: string;
+  category: string;
+  confidence: number;
+  analyzedAt: string;
+}
+
 const MODEL_PATH = '/model/model.onnx';
 const MODEL_IMAGE_SIZE = 500;
 
@@ -41,6 +49,21 @@ function preprocessImage(bitmap: ImageBitmap): Float32Array {
   return rgb;
 }
 
+function fileToDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === 'string') {
+        resolve(reader.result);
+      } else {
+        reject(new Error('Failed to convert image to data URL.'));
+      }
+    };
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
+}
+
 export default function App() {
   const [isScanning, setIsScanning] = useState(false);
   const [isModelLoading, setIsModelLoading] = useState(true);
@@ -48,6 +71,7 @@ export default function App() {
   const [progress, setProgress] = useState(0);
   const [results, setResults] = useState<AnalysisResult[] | null>(null);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [imageHistory, setImageHistory] = useState<ImageHistoryItem[]>([]);
   const [showPopup, setShowPopup] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -83,13 +107,25 @@ export default function App() {
     };
   }, []);
 
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('aiImageHistory');
+      if (stored) {
+        const parsed: ImageHistoryItem[] = JSON.parse(stored);
+        setImageHistory(parsed.slice(0, 10));
+      }
+    } catch {
+      // ignore malformed localStorage
+    }
+  }, []);
+
   const handleImageUpload = async (file: File) => {
     if (!session) {
       setErrorMessage('Model is not ready yet. Please wait a moment and try again.');
       return;
     }
 
-    const imageUrl = URL.createObjectURL(file);
+    const imageUrl = await fileToDataUrl(file);
     setUploadedImage(imageUrl);
     setResults(null);
     setErrorMessage(null);
@@ -130,6 +166,20 @@ export default function App() {
       setResults(sortedResults);
       setShowPopup(true);
       setProgress(100);
+
+      const newHistoryItem: ImageHistoryItem = {
+        id: Date.now(),
+        imageUrl,
+        category: sortedResults[0].category,
+        confidence: sortedResults[0].confidence,
+        analyzedAt: new Date().toLocaleString(),
+      };
+
+      setImageHistory((prevHistory) => {
+        const nextHistory = [newHistoryItem, ...prevHistory].slice(0, 10);
+        localStorage.setItem('aiImageHistory', JSON.stringify(nextHistory));
+        return nextHistory;
+      });
     } catch (error) {
       setErrorMessage(
         error instanceof Error
@@ -186,6 +236,23 @@ export default function App() {
           <div className="max-w-3xl mx-auto mb-8 rounded-xl border border-red-200 bg-red-50 p-4 text-red-700">
             {errorMessage}
           </div>
+        )}
+
+        {imageHistory.length > 0 && (
+          <section className="max-w-6xl mx-auto mb-8">
+            <h2 className="text-lg font-semibold text-gray-900 mb-3">Recent Analyses</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+              {imageHistory.map((item) => (
+                <div key={item.id} className="rounded-xl overflow-hidden border border-gray-200 bg-white shadow-sm">
+                  <img src={item.imageUrl} alt={`History ${item.id}`} className="h-24 w-full object-cover" />
+                  <div className="p-2">
+                    <p className="text-xs font-semibold text-gray-800 truncate">{item.category} ({item.confidence}%)</p>
+                    <p className="text-xs text-gray-500">{item.analyzedAt}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
         )}
 
         {!uploadedImage && <ImageUploader onImageUpload={handleImageUpload} disabled={isModelLoading || !session} />}

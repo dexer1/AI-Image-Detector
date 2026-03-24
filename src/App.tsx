@@ -240,18 +240,33 @@ export default function App() {
 
         {!uploadedImage && <ImageUploader onImageUpload={handleImageUpload} disabled={isModelLoading || !session} />}
 
-        {imageHistory.length > 0 && (
-          <section className="max-w-6xl mx-auto mt-8">
-            <h2 className="text-lg font-semibold text-gray-900 mb-3">Recent Analyses</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+        {!uploadedImage && imageHistory.length > 0 && (
+          <section className="max-w-6xl mx-auto mt-12">
+            <div className="flex items-center justify-between mb-4 px-1">
+              <h2 className="text-xl font-bold text-gray-900">Recent Analyses</h2>
+              <button
+                onClick={() => {
+                  setImageHistory([]);
+                  localStorage.removeItem('aiImageHistory');
+                }}
+                className="text-xs font-medium text-red-500 hover:text-red-700 hover:bg-red-50 px-3 py-1.5 rounded-md transition-colors"
+              >
+                Clear History
+              </button>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
               {imageHistory.map((item) => (
-                <div key={item.id} className="rounded-2xl overflow-hidden border border-gray-200 bg-white shadow-sm hover:shadow-md transition-shadow duration-200">
-                  <div className="h-32 w-full overflow-hidden">
-                    <img src={item.imageUrl} alt={`History ${item.id}`} className="h-full w-full object-cover" />
+                <div key={item.id} className="group relative flex flex-col rounded-xl overflow-hidden border border-gray-200 bg-white shadow-sm hover:shadow-md transition-all duration-300">
+                  <div className="aspect-video w-full overflow-hidden bg-gray-50 relative">
+                    <img src={item.imageUrl} alt={`History ${item.id}`} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300" />
                   </div>
-                  <div className="p-3">
-                    <p className="text-sm font-semibold text-gray-800 truncate">{item.category} ({item.confidence}%)</p>
-                    <p className="text-xs text-gray-500 mt-1">{item.analyzedAt}</p>
+                  <div className="p-3 flex flex-col flex-1">
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <span className="text-sm font-semibold text-gray-900 truncate" title={item.category}>{item.category}</span>
+                      <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${item.category === 'AI Generated' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-700'}`}>{Math.round(item.confidence)}%</span>
+                    </div>
+                    <p className="text-[11px] text-gray-400 mt-auto">{item.analyzedAt}</p>
                   </div>
                 </div>
               ))}

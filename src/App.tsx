@@ -96,7 +96,7 @@ export default function App() {
     setProgress(0);
 
     const interval = setInterval(() => {
-      setProgress((prev) => {
+      setProgress((prev: number) => {
         if (prev >= 92) return prev;
         return prev + 2.5;
       });
@@ -152,13 +152,16 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <header className="border-b border-gray-200 bg-white">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-emerald-500 rounded-md flex items-center justify-center">
-              <ImageIcon className="w-5 h-5 text-white" />
+      <header className="sticky top-0 z-30 border-b border-gray-200 bg-white/95 backdrop-blur-sm shadow-sm">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-emerald-500 rounded-md flex items-center justify-center">
+                <ImageIcon className="w-5 h-5 text-white" />
+              </div>
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight">AI Image Identifier</h1>
             </div>
-            <h1 className="text-2xl font-semibold text-gray-900">AI Image Identifier</h1>
+            <p className="hidden md:block text-sm text-gray-500">Upload an image and detect whether it is AI-generated.</p>
           </div>
         </div>
       </header>

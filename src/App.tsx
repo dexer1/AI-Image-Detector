@@ -48,6 +48,7 @@ export default function App() {
   const [progress, setProgress] = useState(0);
   const [results, setResults] = useState<AnalysisResult[] | null>(null);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [showPopup, setShowPopup] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
@@ -121,12 +122,13 @@ export default function App() {
       const aiConfidence = Number((aiProbability * 100).toFixed(1));
       const humanConfidence = Number((noAiProbability * 100).toFixed(1));
 
-      setResults(
-        [
-          { category: 'AI Generated', confidence: aiConfidence, color: '#10b981' },
-          { category: 'Likely Real', confidence: humanConfidence, color: '#cbd5e1' },
-        ].sort((a, b) => b.confidence - a.confidence)
-      );
+      const sortedResults = [
+        { category: 'AI Generated', confidence: aiConfidence, color: '#10b981' },
+        { category: 'Likely Real', confidence: humanConfidence, color: '#cbd5e1' },
+      ].sort((a, b) => b.confidence - a.confidence);
+
+      setResults(sortedResults);
+      setShowPopup(true);
       setProgress(100);
     } catch (error) {
       setErrorMessage(
@@ -145,6 +147,7 @@ export default function App() {
   const handleReset = () => {
     setUploadedImage(null);
     setResults(null);
+    setShowPopup(false);
     setErrorMessage(null);
     setIsScanning(false);
     setProgress(0);
@@ -206,6 +209,54 @@ export default function App() {
             imageUrl={uploadedImage}
             onReset={handleReset}
           />
+        )}
+
+        {showPopup && results && uploadedImage && !isScanning && (
+          <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/50 p-4">
+            <div className="w-full max-w-lg rounded-2xl bg-white border border-gray-200 p-6 shadow-2xl">
+              <div className="flex items-center justify-between gap-4 mb-4">
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900">Analysis Result</h3>
+                  <p className="text-sm text-gray-500">Identified results are shown below.</p>
+                </div>
+                <button
+                  onClick={() => setShowPopup(false)}
+                  className="rounded-md px-2 py-1 text-sm font-medium text-gray-600 hover:bg-gray-100"
+                >
+                  Close
+                </button>
+              </div>
+
+              <div className="space-y-3">
+                <p className="text-gray-700">Primary result: <strong>{results[0]?.category}</strong> ({results[0]?.confidence}%)</p>
+                <div className="grid grid-cols-1 gap-2">
+                  {results.map((result, index) => (
+                    <div key={index} className="rounded-lg border border-gray-100 bg-gray-50 p-3">
+                      <div className="flex items-center justify-between">
+                        <span className="font-medium text-gray-800">{result.category}</span>
+                        <span className="text-sm font-semibold text-emerald-600">{result.confidence}%</span>
+                      </div>
+                      <div className="mt-2 h-2 w-full rounded-full bg-gray-200">
+                        <div
+                          className="h-full rounded-full"
+                          style={{ width: `${result.confidence}%`, backgroundColor: result.color }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mt-5 text-right">
+                <button
+                  onClick={() => { setShowPopup(false); handleReset(); }}
+                  className="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600"
+                >
+                  New Analysis
+                </button>
+              </div>
+            </div>
+          </div>
         )}
 
         {!uploadedImage && (

@@ -238,24 +238,26 @@ export default function App() {
           </div>
         )}
 
+        {!uploadedImage && <ImageUploader onImageUpload={handleImageUpload} disabled={isModelLoading || !session} />}
+
         {imageHistory.length > 0 && (
-          <section className="max-w-6xl mx-auto mb-8">
+          <section className="max-w-6xl mx-auto mt-8">
             <h2 className="text-lg font-semibold text-gray-900 mb-3">Recent Analyses</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
               {imageHistory.map((item) => (
-                <div key={item.id} className="rounded-xl overflow-hidden border border-gray-200 bg-white shadow-sm">
-                  <img src={item.imageUrl} alt={`History ${item.id}`} className="h-24 w-full object-cover" />
-                  <div className="p-2">
-                    <p className="text-xs font-semibold text-gray-800 truncate">{item.category} ({item.confidence}%)</p>
-                    <p className="text-xs text-gray-500">{item.analyzedAt}</p>
+                <div key={item.id} className="rounded-2xl overflow-hidden border border-gray-200 bg-white shadow-sm hover:shadow-md transition-shadow duration-200">
+                  <div className="h-32 w-full overflow-hidden">
+                    <img src={item.imageUrl} alt={`History ${item.id}`} className="h-full w-full object-cover" />
+                  </div>
+                  <div className="p-3">
+                    <p className="text-sm font-semibold text-gray-800 truncate">{item.category} ({item.confidence}%)</p>
+                    <p className="text-xs text-gray-500 mt-1">{item.analyzedAt}</p>
                   </div>
                 </div>
               ))}
             </div>
           </section>
         )}
-
-        {!uploadedImage && <ImageUploader onImageUpload={handleImageUpload} disabled={isModelLoading || !session} />}
 
         {isScanning && uploadedImage && (
           <div className="max-w-3xl mx-auto space-y-8">

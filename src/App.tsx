@@ -6,6 +6,7 @@ import { ProgressBar } from './components/ProgressBar';
 import { ResultDashboard } from './components/ResultDashboard';
 
 interface AnalysisResult {
+  key: 'ai' | 'real';
   category: string;
   confidence: number;
   color: string;
@@ -24,6 +25,16 @@ const MODEL_IMAGE_SIZE = 500;
 
 function clamp01(value: number): number {
   return Math.max(0, Math.min(1, value));
+}
+
+function getCategoryLabel(
+  key: 'ai' | 'real',
+  confidence: number,
+  gap: number
+): string {
+  const baseLabel = key === 'ai' ? 'AI Generated' : 'Real Image';
+  const isDefinite = confidence >= 80 || gap >= 25;
+  return `${isDefinite ? 'Definitely' : 'Likely'} ${baseLabel}`;
 }
 
 function preprocessImage(bitmap: ImageBitmap): Float32Array {
@@ -156,11 +167,22 @@ export default function App() {
       const aiProbability = clamp01(1 - noAiProbability);
 
       const aiConfidence = Number((aiProbability * 100).toFixed(1));
-      const humanConfidence = Number((noAiProbability * 100).toFixed(1));
+      const realConfidence = Number((noAiProbability * 100).toFixed(1));
+      const confidenceGap = Math.abs(aiConfidence - realConfidence);
 
       const sortedResults = [
-        { category: 'AI Generated', confidence: aiConfidence, color: '#10b981' },
-        { category: 'Likely Real', confidence: humanConfidence, color: '#cbd5e1' },
+        {
+          key: 'ai' as const,
+          category: getCategoryLabel('ai', aiConfidence, confidenceGap),
+          confidence: aiConfidence,
+          color: '#10b981',
+        },
+        {
+          key: 'real' as const,
+          category: getCategoryLabel('real', realConfidence, confidenceGap),
+          confidence: realConfidence,
+          color: '#cbd5e1',
+        },
       ].sort((a, b) => b.confidence - a.confidence);
 
       setResults(sortedResults);
@@ -264,7 +286,7 @@ export default function App() {
                   <div className="p-3 flex flex-col flex-1">
                     <div className="flex items-center justify-between gap-2 mb-1">
                       <span className="text-sm font-semibold text-gray-900 truncate" title={item.category}>{item.category}</span>
-                      <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${item.category === 'AI Generated' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-700'}`}>{Math.round(item.confidence)}%</span>
+                      <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${item.category.includes('AI') ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-700'}`}>{Math.round(item.confidence)}%</span>
                     </div>
                     <p className="text-[11px] text-gray-400 mt-auto">{item.analyzedAt}</p>
                   </div>

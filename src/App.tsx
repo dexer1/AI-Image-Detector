@@ -319,33 +319,83 @@ export default function App() {
 
         {showPopup && results && uploadedImage && !isScanning && (
           <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/50 p-4">
-            <div className="w-full max-w-lg rounded-2xl bg-white border border-gray-200 p-6 shadow-2xl">
-              <div className="flex items-center justify-between gap-4 mb-4">
+            <div className="w-full max-w-2xl rounded-[28px] border border-white/60 bg-white p-6 shadow-[0_24px_80px_rgba(15,23,42,0.18)] sm:p-8">
+              <div className="flex items-start justify-between gap-4 mb-6">
                 <div>
-                  <h3 className="text-xl font-bold text-gray-900">Analysis Result</h3>
-                  <p className="text-sm text-gray-500">Identified results are shown below.</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-600">
+                    Analysis Result
+                  </p>
+                  <h3 className="mt-2 text-2xl font-bold text-gray-900">Final Prediction</h3>
+                  <p className="mt-1 text-sm text-gray-500">
+                    The strongest result is highlighted first so it is immediately visible.
+                  </p>
                 </div>
                 <button
                   onClick={() => setShowPopup(false)}
-                  className="rounded-md px-2 py-1 text-sm font-medium text-gray-600 hover:bg-gray-100"
+                  className="rounded-full border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100"
                 >
                   Close
                 </button>
               </div>
 
-              <div className="space-y-3">
-                <p className="text-gray-700">Primary result: <strong>{results[0]?.category}</strong> ({results[0]?.confidence}%)</p>
-                <div className="grid grid-cols-1 gap-2">
+              <div className="rounded-[24px] bg-[radial-gradient(circle_at_top_left,_rgba(16,185,129,0.18),_transparent_45%),linear-gradient(135deg,#0f172a_0%,#111827_45%,#1f2937_100%)] p-6 text-white shadow-lg">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-200">
+                      Top Result
+                    </p>
+                    <h4 className="mt-2 text-3xl font-bold leading-tight sm:text-4xl">
+                      {results[0]?.category}
+                    </h4>
+                    <p className="mt-2 max-w-xl text-sm text-slate-200">
+                      This image most strongly matches the category above based on the current model prediction.
+                    </p>
+                  </div>
+                  <div className="inline-flex min-w-[120px] flex-col rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-right backdrop-blur-sm">
+                    <span className="text-xs font-medium uppercase tracking-[0.2em] text-slate-300">
+                      Confidence
+                    </span>
+                    <span className="mt-1 text-4xl font-bold text-white">
+                      {Math.round(results[0]?.confidence ?? 0)}%
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-6 grid grid-cols-1 gap-3">
+                <p className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-500">
+                  Score Breakdown
+                </p>
+                <div className="grid grid-cols-1 gap-3">
                   {results.map((result, index) => (
-                    <div key={index} className="rounded-lg border border-gray-100 bg-gray-50 p-3">
-                      <div className="flex items-center justify-between">
-                        <span className="font-medium text-gray-800">{result.category}</span>
-                        <span className="text-sm font-semibold text-emerald-600">{result.confidence}%</span>
+                    <div
+                      key={index}
+                      className={`rounded-2xl border p-4 transition-all ${
+                        index === 0
+                          ? 'border-emerald-200 bg-emerald-50 shadow-sm'
+                          : 'border-gray-200 bg-gray-50'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between gap-4">
+                        <div>
+                          <p className="text-base font-semibold text-gray-900">{result.category}</p>
+                          <p className="mt-1 text-xs uppercase tracking-[0.18em] text-gray-500">
+                            {index === 0 ? 'Primary match' : 'Secondary match'}
+                          </p>
+                        </div>
+                        <span className={`text-lg font-bold ${index === 0 ? 'text-emerald-600' : 'text-gray-700'}`}>
+                          {result.confidence}%
+                        </span>
                       </div>
-                      <div className="mt-2 h-2 w-full rounded-full bg-gray-200">
+                      <div className="mt-3 h-3 w-full overflow-hidden rounded-full bg-white shadow-inner">
                         <div
                           className="h-full rounded-full"
-                          style={{ width: `${result.confidence}%`, backgroundColor: result.color }}
+                          style={{
+                            width: `${result.confidence}%`,
+                            background: index === 0
+                              ? 'linear-gradient(90deg, #10b981 0%, #34d399 100%)'
+                              : 'linear-gradient(90deg, #94a3b8 0%, #cbd5e1 100%)',
+                          }}
                         />
                       </div>
                     </div>
@@ -353,10 +403,10 @@ export default function App() {
                 </div>
               </div>
 
-              <div className="mt-5 text-right">
+              <div className="mt-6 flex justify-end">
                 <button
                   onClick={() => { setShowPopup(false); handleReset(); }}
-                  className="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600"
+                  className="rounded-xl bg-emerald-500 px-5 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-600"
                 >
                   New Analysis
                 </button>

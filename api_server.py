@@ -9,8 +9,10 @@ from PIL import Image
 import tensorflow as tf
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-MODEL_PATH = os.path.join(SCRIPT_DIR, "ai_noai_model.keras")
-IMG_SIZE = (500, 500)
+BEST_MODEL_PATH = os.path.join(SCRIPT_DIR, "ai_noai_model_best.keras")
+FALLBACK_MODEL_PATH = os.path.join(SCRIPT_DIR, "ai_noai_model.keras")
+MODEL_PATH = BEST_MODEL_PATH if os.path.exists(BEST_MODEL_PATH) else FALLBACK_MODEL_PATH
+IMG_SIZE = (32, 32)
 HOST = os.getenv("MODEL_API_HOST", "0.0.0.0")
 PORT = int(os.getenv("PORT", os.getenv("MODEL_API_PORT", "8000")))
 
@@ -72,16 +74,16 @@ class PredictionHandler(BaseHTTPRequestHandler):
 
             image_tensor = _preprocess_image(image_base64)
 
-            # Training was done with class folders ai/noai, so sigmoid output maps to noai.
-            noai_probability = float(model.predict(image_tensor, verbose=0)[0][0])
-            noai_probability = max(0.0, min(1.0, noai_probability))
-            ai_probability = 1.0 - noai_probability
+            # With binary training on fake/real folders, sigmoid output maps to the positive class: real.
+            real_probability = float(model.predict(image_tensor, verbose=0)[0][0])
+            real_probability = max(0.0, min(1.0, real_probability))
+            ai_probability = 1.0 - real_probability
 
             result = {
                 "ai_probability": ai_probability,
-                "human_probability": noai_probability,
-                "predicted_label": "AI Generated" if ai_probability >= noai_probability else "Likely Real",
-                "confidence": max(ai_probability, noai_probability),
+                "human_probability": real_probability,
+                "predicted_label": "AI Generated" if ai_probability >= real_probability else "Likely Real",
+                "confidence": max(ai_probability, real_probability),
             }
             _send_json(self, 200, result)
         except json.JSONDecodeError:

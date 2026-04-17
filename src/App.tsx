@@ -318,98 +318,129 @@ export default function App() {
         )}
 
         {showPopup && results && uploadedImage && !isScanning && (
-          <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/50 p-4">
-            <div className="w-full max-w-2xl rounded-[28px] border border-white/60 bg-white p-6 shadow-[0_24px_80px_rgba(15,23,42,0.18)] sm:p-8">
-              <div className="flex items-start justify-between gap-4 mb-6">
+          <div className="fixed inset-0 z-40 overflow-y-auto bg-slate-950/55 p-4 backdrop-blur-sm">
+            <div className="flex min-h-full items-center justify-center py-6">
+              <div className="w-full max-w-4xl rounded-[28px] border border-white/70 bg-white p-5 shadow-[0_24px_80px_rgba(15,23,42,0.18)] sm:p-8">
+                <div className="mb-6 flex items-start justify-between gap-4">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-600">
                     Analysis Result
                   </p>
                   <h3 className="mt-2 text-2xl font-bold text-gray-900">Final Prediction</h3>
                   <p className="mt-1 text-sm text-gray-500">
-                    The strongest result is highlighted first so it is immediately visible.
+                    Review the uploaded image and the model's confidence scores in one place.
                   </p>
                 </div>
                 <button
                   onClick={() => setShowPopup(false)}
-                  className="rounded-full border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100"
+                  className="inline-flex h-11 items-center justify-center rounded-full border border-gray-200 px-5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100"
                 >
                   Close
                 </button>
               </div>
 
-              <div className="rounded-[24px] bg-[radial-gradient(circle_at_top_left,_rgba(16,185,129,0.18),_transparent_45%),linear-gradient(135deg,#0f172a_0%,#111827_45%,#1f2937_100%)] p-6 text-white shadow-lg">
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-200">
-                      Top Result
-                    </p>
-                    <h4 className="mt-2 text-3xl font-bold leading-tight sm:text-4xl">
-                      {results[0]?.category}
-                    </h4>
-                    <p className="mt-2 max-w-xl text-sm text-slate-200">
-                      This image most strongly matches the category above based on the current model prediction.
-                    </p>
+                <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(340px,0.95fr)]">
+                  <div className="overflow-hidden rounded-[24px] border border-gray-200 bg-gray-50 shadow-[inset_0_1px_0_rgba(255,255,255,0.6)]">
+                    <div className="flex items-center justify-between border-b border-gray-200 bg-white/80 px-4 py-3 backdrop-blur-sm">
+                      <div>
+                        <p className="text-sm font-semibold text-gray-900">Uploaded Image</p>
+                        <p className="text-xs text-gray-500">Preview used for this detection</p>
+                      </div>
+                      <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
+                        Ready
+                      </span>
+                    </div>
+                    <div className="bg-[radial-gradient(circle_at_top,_rgba(16,185,129,0.18),_transparent_50%)] p-4 sm:p-5">
+                      <img
+                        src={uploadedImage}
+                        alt="Analyzed image preview"
+                        className="h-[260px] w-full rounded-[20px] bg-white object-contain shadow-[0_18px_40px_rgba(15,23,42,0.12)] sm:h-[340px]"
+                      />
+                    </div>
                   </div>
-                  <div className="inline-flex min-w-[120px] flex-col rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-right backdrop-blur-sm">
-                    <span className="text-xs font-medium uppercase tracking-[0.2em] text-slate-300">
-                      Confidence
-                    </span>
-                    <span className="mt-1 text-4xl font-bold text-white">
-                      {Math.round(results[0]?.confidence ?? 0)}%
-                    </span>
-                  </div>
-                </div>
-              </div>
 
-              <div className="mt-6 grid grid-cols-1 gap-3">
-                <p className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-500">
-                  Score Breakdown
-                </p>
-                <div className="grid grid-cols-1 gap-3">
-                  {results.map((result, index) => (
-                    <div
-                      key={index}
-                      className={`rounded-2xl border p-4 transition-all ${
-                        index === 0
-                          ? 'border-emerald-200 bg-emerald-50 shadow-sm'
-                          : 'border-gray-200 bg-gray-50'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between gap-4">
+                  <div className="space-y-4">
+                    <div className="rounded-[24px] bg-[radial-gradient(circle_at_top_left,_rgba(16,185,129,0.18),_transparent_45%),linear-gradient(135deg,#0f172a_0%,#111827_45%,#1f2937_100%)] p-6 text-white shadow-lg">
+                      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                         <div>
-                          <p className="text-base font-semibold text-gray-900">{result.category}</p>
-                          <p className="mt-1 text-xs uppercase tracking-[0.18em] text-gray-500">
-                            {index === 0 ? 'Primary match' : 'Secondary match'}
+                          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-200">
+                            Top Result
+                          </p>
+                          <h4 className="mt-2 text-3xl font-bold leading-tight sm:text-4xl">
+                            {results[0]?.category}
+                          </h4>
+                          <p className="mt-2 max-w-xl text-sm text-slate-200">
+                            This is the strongest prediction from the current model.
                           </p>
                         </div>
-                        <span className={`text-lg font-bold ${index === 0 ? 'text-emerald-600' : 'text-gray-700'}`}>
-                          {result.confidence}%
-                        </span>
-                      </div>
-                      <div className="mt-3 h-3 w-full overflow-hidden rounded-full bg-white shadow-inner">
-                        <div
-                          className="h-full rounded-full"
-                          style={{
-                            width: `${result.confidence}%`,
-                            background: index === 0
-                              ? 'linear-gradient(90deg, #10b981 0%, #34d399 100%)'
-                              : 'linear-gradient(90deg, #94a3b8 0%, #cbd5e1 100%)',
-                          }}
-                        />
+                        <div className="inline-flex min-w-[120px] flex-col rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-right backdrop-blur-sm">
+                          <span className="text-xs font-medium uppercase tracking-[0.2em] text-slate-300">
+                            Confidence
+                          </span>
+                          <span className="mt-1 text-4xl font-bold text-white">
+                            {Math.round(results[0]?.confidence ?? 0)}%
+                          </span>
+                        </div>
                       </div>
                     </div>
-                  ))}
-                </div>
-              </div>
 
-              <div className="mt-6 flex justify-end">
-                <button
-                  onClick={() => { setShowPopup(false); handleReset(); }}
-                  className="rounded-xl bg-emerald-500 px-5 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-600"
-                >
-                  New Analysis
-                </button>
+                    <div className="grid grid-cols-1 gap-3">
+                      <p className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-500">
+                        Score Breakdown
+                      </p>
+                      <div className="grid grid-cols-1 gap-3">
+                        {results.map((result, index) => (
+                          <div
+                            key={index}
+                            className={`rounded-2xl border p-4 transition-all ${
+                              index === 0
+                                ? 'border-emerald-200 bg-emerald-50 shadow-sm'
+                                : 'border-gray-200 bg-gray-50'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between gap-4">
+                              <div>
+                                <p className="text-base font-semibold text-gray-900">{result.category}</p>
+                                <p className="mt-1 text-xs uppercase tracking-[0.18em] text-gray-500">
+                                  {index === 0 ? 'Primary match' : 'Secondary match'}
+                                </p>
+                              </div>
+                              <span className={`text-lg font-bold ${index === 0 ? 'text-emerald-600' : 'text-gray-700'}`}>
+                                {result.confidence}%
+                              </span>
+                            </div>
+                            <div className="mt-3 h-3 w-full overflow-hidden rounded-full bg-white shadow-inner">
+                              <div
+                                className="h-full rounded-full"
+                                style={{
+                                  width: `${result.confidence}%`,
+                                  background: index === 0
+                                    ? 'linear-gradient(90deg, #10b981 0%, #34d399 100%)'
+                                    : 'linear-gradient(90deg, #94a3b8 0%, #cbd5e1 100%)',
+                                }}
+                              />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                      <button
+                        onClick={() => setShowPopup(false)}
+                        className="rounded-xl border border-gray-200 px-5 py-3 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50"
+                      >
+                        Back to Results
+                      </button>
+                      <button
+                        onClick={() => { setShowPopup(false); handleReset(); }}
+                        className="rounded-xl bg-emerald-500 px-5 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-600"
+                      >
+                        New Analysis
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

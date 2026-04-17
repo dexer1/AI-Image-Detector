@@ -42,7 +42,7 @@ export function ResultDashboard({ results, imageUrl, onReset }: ResultDashboardP
             <img
               src={imageUrl}
               alt="Analyzed"
-              className="w-full h-64 rounded-xl bg-white object-contain shadow-sm"
+              className="w-full h-48 rounded-xl bg-white object-contain shadow-sm sm:h-56"
             />
           </div>
           <div className="mt-4 rounded-xl border border-emerald-100 bg-emerald-50 p-4">

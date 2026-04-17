@@ -350,34 +350,34 @@ export default function App() {
                         Ready
                       </span>
                     </div>
-                    <div className="bg-[radial-gradient(circle_at_top,_rgba(16,185,129,0.18),_transparent_50%)] p-4 sm:p-5">
+                    <div className="bg-[radial-gradient(circle_at_top,_rgba(16,185,129,0.14),_transparent_48%)] p-4 sm:p-5">
                       <img
                         src={uploadedImage}
                         alt="Analyzed image preview"
-                        className="h-[260px] w-full rounded-[20px] bg-white object-contain shadow-[0_18px_40px_rgba(15,23,42,0.12)] sm:h-[340px]"
+                        className="h-[180px] w-full rounded-[20px] bg-white object-contain shadow-[0_18px_40px_rgba(15,23,42,0.12)] sm:h-[240px]"
                       />
                     </div>
                   </div>
 
                   <div className="space-y-4">
-                    <div className="rounded-[24px] bg-[radial-gradient(circle_at_top_left,_rgba(16,185,129,0.18),_transparent_45%),linear-gradient(135deg,#0f172a_0%,#111827_45%,#1f2937_100%)] p-6 text-white shadow-lg">
+                    <div className="rounded-[24px] border border-emerald-100 bg-gradient-to-br from-emerald-50 via-white to-slate-50 p-6 text-gray-900 shadow-sm">
                       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                         <div>
-                          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-200">
+                          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-600">
                             Top Result
                           </p>
                           <h4 className="mt-2 text-3xl font-bold leading-tight sm:text-4xl">
                             {results[0]?.category}
                           </h4>
-                          <p className="mt-2 max-w-xl text-sm text-slate-200">
+                          <p className="mt-2 max-w-xl text-sm text-gray-600">
                             This is the strongest prediction from the current model.
                           </p>
                         </div>
-                        <div className="inline-flex min-w-[120px] flex-col rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-right backdrop-blur-sm">
-                          <span className="text-xs font-medium uppercase tracking-[0.2em] text-slate-300">
+                        <div className="inline-flex min-w-[120px] flex-col rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-right shadow-sm">
+                          <span className="text-xs font-medium uppercase tracking-[0.2em] text-gray-500">
                             Confidence
                           </span>
-                          <span className="mt-1 text-4xl font-bold text-white">
+                          <span className="mt-1 text-4xl font-bold text-emerald-600">
                             {Math.round(results[0]?.confidence ?? 0)}%
                           </span>
                         </div>
